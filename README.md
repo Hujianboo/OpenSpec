@@ -7,6 +7,8 @@
   </a>
 </p>
 
+> **BlockSpec** — A spec-driven AI workflow tool for the Block team, based on [OpenSpec](https://github.com/Fission-AI/OpenSpec).
+
 <p align="center">
   <a href="https://github.com/Fission-AI/OpenSpec/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fission-AI/OpenSpec/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="https://www.npmjs.com/package/@fission-ai/openspec"><img alt="npm version" src="https://img.shields.io/npm/v/@fission-ai/openspec?style=flat-square" /></a>
@@ -36,7 +38,7 @@ Our philosophy:
 > [!TIP]
 > **New workflow now available!** We've rebuilt OpenSpec with a new artifact-guided workflow.
 >
-> Run `/opsx:propose "your idea"` to get started. → [Learn more here](docs/opsx.md)
+> Run `/opsx:propose "your idea"` to get started, or `/opsx:tdd "your idea"` for test-driven development. → [Learn more here](docs/opsx.md)
 
 <p align="center">
   Follow <a href="https://x.com/0xTab">@0xTab on X</a> for updates · Join the <a href="https://discord.gg/YctCnvvshC">OpenSpec Discord</a> for help and questions.
@@ -49,6 +51,8 @@ Using OpenSpec in a team? [Email here](mailto:teams@openspec.dev) for access to 
 <!-- TODO: Add GIF demo of /opsx:propose → /opsx:archive workflow -->
 
 ## See it in action
+
+**Default workflow** (`spec-driven`): proposal → specs → design → tasks
 
 ```text
 You: /opsx:propose add-dark-mode
@@ -70,6 +74,29 @@ AI:  Implementing tasks...
 You: /opsx:archive
 AI:  Archived to openspec/changes/archive/2025-01-23-add-dark-mode/
      Specs updated. Ready for the next feature.
+```
+
+**TDD workflow** (`tdd`): proposal → specs → test-plan → design → tasks
+
+```text
+You: /opsx:tdd add-payment-validation
+AI:  Created openspec/changes/add-payment-validation/
+     ✓ proposal.md  — why we're doing this, what's changing
+     ✓ specs/       — GIVEN/WHEN/THEN scenarios, manual-verify markers
+     ✓ test-plan.md — auto-test / visual / manual classification
+     ✓ design.md    — technical approach + test strategy
+     ✓ tasks.md     — [RED]/[GREEN]/[REFACTOR]/[UI]/[VERIFY] labeled tasks
+     Ready for test-driven implementation!
+
+You: /opsx:apply
+AI:  [RED]    Write failing test: validateCard returns error on invalid number
+     [GREEN]  Implement validateCard
+     [RED]    Write failing test: validateCard accepts Visa/Mastercard
+     [GREEN]  Handle card type check
+     [REFACTOR] Extract card type constants
+     [UI]     Style error message component  ← visual inspection
+     [VERIFY] Manual: test on real device   ← manual checkpoint
+     All tasks complete!
 ```
 
 <details>
@@ -100,6 +127,8 @@ openspec init
 
 Now tell your AI: `/opsx:propose <what-you-want-to-build>`
 
+For test-driven development, use `/opsx:tdd <what-you-want-to-build>` instead — it adds a `test-plan` phase and enforces `[RED]/[GREEN]/[REFACTOR]` task discipline during implementation.
+
 If you want the expanded workflow (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`), select it with `openspec config profile` and apply with `openspec update`.
 
 > [!NOTE]
@@ -127,6 +156,7 @@ AI coding assistants are powerful but unpredictable when requirements live only 
 - **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
 - **Work fluidly** — update any artifact anytime, no rigid phase gates
 - **Use your tools** — works with 20+ AI assistants via slash commands
+- **Choose your discipline** — `spec-driven` for lightweight iteration, `tdd` for test-first engineering
 
 ### How we compare
 
