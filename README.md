@@ -1,20 +1,37 @@
-<p align="center">
-  <a href="https://github.com/Fission-AI/OpenSpec">
-    <picture>
-      <source srcset="assets/openspec_bg.png">
-      <img src="assets/openspec_bg.png" alt="OpenSpec logo">
-    </picture>
-  </a>
-</p>
+**Language / 语言:** [English](README.md) · [中文](README.zh-CN.md)
+
+---
 
 > **BlockSpec** — A spec-driven AI workflow tool for the Block team, based on [OpenSpec](https://github.com/Fission-AI/OpenSpec).
 
-<p align="center">
-  <a href="https://github.com/Fission-AI/OpenSpec/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fission-AI/OpenSpec/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://www.npmjs.com/package/@fission-ai/openspec"><img alt="npm version" src="https://img.shields.io/npm/v/@fission-ai/openspec?style=flat-square" /></a>
-  <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" /></a>
-  <a href="https://discord.gg/YctCnvvshC"><img alt="Discord" src="https://img.shields.io/discord/1411657095639601154?style=flat-square&logo=discord&logoColor=white&label=Discord&suffix=%20online" /></a>
-</p>
+**Install BlockSpec from npm**
+
+```bash
+npm install -g @blockdance-lab/blockspec   # global CLI (command: blockspec)
+npm install @blockdance-lab/blockspec      # add as a project dependency
+```
+
+Run `blockspec init` in your repo, then use the same `/opsx:…` slash commands as upstream OpenSpec. The rest of this README still documents the OpenSpec-style workflow and CLI unless noted here.
+
+### TDD workflow (`tdd` schema)
+
+Start a change with **`/opsx:tdd "<name>"`** (or `blockspec new change "<name>" --schema tdd`). Artifact order: **proposal → specs → test-plan → design → tasks**, then **`/opsx:apply`**. The `tdd` schema adds a **test-plan** phase before design so verification strategy is explicit.
+
+**Preferring human / visual work over automated tests**
+
+BlockSpec does not force everything through unit tests. The pipeline is controlled by how you (or the AI) write three layers:
+
+1. **Specs (`specs/**/spec.md`)** — For behavior you cannot express as a single deterministic assertion (visual polish, motion, device-specific behavior), put **`<!-- manual-verify -->`** immediately after the scenario heading. That marks the scenario as not a default auto-test target.
+
+2. **`test-plan.md`** — Each scenario becomes a verification item. Classify as **`auto-test`** only when you will actually write and maintain an automated test with Setup / Action / Assert. Use **`visual`** when “looks right” is the pass condition (browser, Storybook, screenshots). Use **`manual`** when a human must follow steps on a device or environment. When in doubt and you do not want automation, bias toward **`visual`** or **`manual`** instead of **`auto-test`**.
+
+3. **`tasks.md`** — Task labels drive apply behavior. **`[RED]` / `[GREEN]` / `[REFACTOR]`** mean strict test-first discipline for that slice of work. **`[UI]`** is for styling and layout without an automated assertion. **`[VERIFY]`** is an explicit human checkpoint (describe what to check). To run a change **mostly by human review**, tell the model clearly—for example: *“Put all scenarios under manual-verify where needed; make test-plan mostly visual/manual; use `[UI]` and `[VERIFY]` tasks and avoid `[RED]`/`[GREEN]` except for core logic.”* Only **`[RED]`/`[GREEN]`** tasks require failing tests before implementation; **`[UI]`** and **`[VERIFY]`** do not.
+
+### Default workflow (lighter)
+
+**`/opsx:propose "<name>"`** — **proposal → specs → design → tasks** (no required `test-plan`). Same slash command works under OpenSpec or after `blockspec init`.
+
+→ More on slash workflows: [docs/opsx.md](docs/opsx.md)
 
 <details>
 <summary><strong>The most loved spec framework.</strong></summary>
@@ -35,11 +52,6 @@ Our philosophy:
 → scalable from personal projects to enterprises
 ```
 
-> [!TIP]
-> **New workflow now available!** We've rebuilt OpenSpec with a new artifact-guided workflow.
->
-> Run `/opsx:propose "your idea"` to get started, or `/opsx:tdd "your idea"` for test-driven development. → [Learn more here](docs/opsx.md)
-
 <p align="center">
   Follow <a href="https://x.com/0xTab">@0xTab on X</a> for updates · Join the <a href="https://discord.gg/YctCnvvshC">OpenSpec Discord</a> for help and questions.
 </p>
@@ -51,6 +63,29 @@ Using OpenSpec in a team? [Email here](mailto:teams@openspec.dev) for access to 
 <!-- TODO: Add GIF demo of /opsx:propose → /opsx:archive workflow -->
 
 ## See it in action
+
+**TDD workflow** (`tdd`): proposal → specs → test-plan → design → tasks
+
+```text
+You: /opsx:tdd add-payment-validation
+AI:  Created openspec/changes/add-payment-validation/
+     ✓ proposal.md  — why we're doing this, what's changing
+     ✓ specs/       — GIVEN/WHEN/THEN scenarios, manual-verify markers
+     ✓ test-plan.md — auto-test / visual / manual classification
+     ✓ design.md    — technical approach + test strategy
+     ✓ tasks.md     — [RED]/[GREEN]/[REFACTOR]/[UI]/[VERIFY] labeled tasks
+     Ready for test-driven implementation!
+
+You: /opsx:apply
+AI:  [RED]    Write failing test: validateCard returns error on invalid number
+     [GREEN]  Implement validateCard
+     [RED]    Write failing test: validateCard accepts Visa/Mastercard
+     [GREEN]  Handle card type check
+     [REFACTOR] Extract card type constants
+     [UI]     Style error message component  ← visual inspection
+     [VERIFY] Manual: test on real device   ← manual checkpoint
+     All tasks complete!
+```
 
 **Default workflow** (`spec-driven`): proposal → specs → design → tasks
 
@@ -74,29 +109,6 @@ AI:  Implementing tasks...
 You: /opsx:archive
 AI:  Archived to openspec/changes/archive/2025-01-23-add-dark-mode/
      Specs updated. Ready for the next feature.
-```
-
-**TDD workflow** (`tdd`): proposal → specs → test-plan → design → tasks
-
-```text
-You: /opsx:tdd add-payment-validation
-AI:  Created openspec/changes/add-payment-validation/
-     ✓ proposal.md  — why we're doing this, what's changing
-     ✓ specs/       — GIVEN/WHEN/THEN scenarios, manual-verify markers
-     ✓ test-plan.md — auto-test / visual / manual classification
-     ✓ design.md    — technical approach + test strategy
-     ✓ tasks.md     — [RED]/[GREEN]/[REFACTOR]/[UI]/[VERIFY] labeled tasks
-     Ready for test-driven implementation!
-
-You: /opsx:apply
-AI:  [RED]    Write failing test: validateCard returns error on invalid number
-     [GREEN]  Implement validateCard
-     [RED]    Write failing test: validateCard accepts Visa/Mastercard
-     [GREEN]  Handle card type check
-     [REFACTOR] Extract card type constants
-     [UI]     Style error message component  ← visual inspection
-     [VERIFY] Manual: test on real device   ← manual checkpoint
-     All tasks complete!
 ```
 
 <details>
@@ -125,9 +137,7 @@ cd your-project
 openspec init
 ```
 
-Now tell your AI: `/opsx:propose <what-you-want-to-build>`
-
-For test-driven development, use `/opsx:tdd <what-you-want-to-build>` instead — it adds a `test-plan` phase and enforces `[RED]/[GREEN]/[REFACTOR]` task discipline during implementation.
+Tell your AI: **`/opsx:tdd <what-you-want-to-build>`** for test-driven development (adds `test-plan` and `[RED]/[GREEN]/[REFACTOR]` discipline), or **`/opsx:propose <what-you-want-to-build>`** for the default lighter workflow.
 
 If you want the expanded workflow (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`), select it with `openspec config profile` and apply with `openspec update`.
 
@@ -156,7 +166,7 @@ AI coding assistants are powerful but unpredictable when requirements live only 
 - **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
 - **Work fluidly** — update any artifact anytime, no rigid phase gates
 - **Use your tools** — works with 20+ AI assistants via slash commands
-- **Choose your discipline** — `spec-driven` for lightweight iteration, `tdd` for test-first engineering
+- **Choose your discipline** — `tdd` for test-first engineering (test-plan + task labels), `spec-driven` for lightweight iteration
 
 ### How we compare
 
