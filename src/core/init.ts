@@ -469,7 +469,7 @@ export class InitCommand {
       return;
     }
 
-    const spinner = this.startSpinner('Creating OpenSpec structure...');
+    const spinner = this.startSpinner('Creating BlockSpec structure...');
 
     const directories = [
       openspecPath,
@@ -484,7 +484,7 @@ export class InitCommand {
 
     spinner.stopAndPersist({
       symbol: PALETTE.white('▌'),
-      text: PALETTE.white('OpenSpec structure created'),
+      text: PALETTE.white('BlockSpec structure created'),
     });
   }
 
@@ -638,7 +638,7 @@ export class InitCommand {
     configStatus: 'created' | 'exists' | 'skipped'
   ): void {
     console.log();
-    console.log(chalk.bold('OpenSpec Setup Complete'));
+    console.log(chalk.bold('BlockSpec Setup Complete'));
     console.log();
 
     // Show created vs refreshed tools

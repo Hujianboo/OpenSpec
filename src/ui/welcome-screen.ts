@@ -17,7 +17,7 @@ const ART_COLUMN_WIDTH = 24;
  */
 function getWelcomeText(): string[] {
   return [
-    chalk.white.bold('Welcome to OpenSpec'),
+    chalk.white.bold('Welcome to BlockSpec'),
     chalk.dim('A lightweight spec-driven framework'),
     '',
     chalk.white('This setup will configure:'),
@@ -25,6 +25,7 @@ function getWelcomeText(): string[] {
     chalk.dim('  • /opsx:* slash commands'),
     '',
     chalk.white('Quick start after setup:'),
+    `  ${chalk.yellow('/opsx:tdd')}      ${chalk.dim('Test-driven development')}`,
     `  ${chalk.yellow('/opsx:new')}      ${chalk.dim('Create a change')}`,
     `  ${chalk.yellow('/opsx:continue')} ${chalk.dim('Next artifact')}`,
     `  ${chalk.yellow('/opsx:apply')}    ${chalk.dim('Implement tasks')}`,
