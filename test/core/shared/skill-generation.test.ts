@@ -8,9 +8,9 @@ import {
 
 describe('skill-generation', () => {
   describe('getSkillTemplates', () => {
-    it('should return all 12 skill templates', () => {
+    it('should return all 13 skill templates', () => {
       const templates = getSkillTemplates();
-      expect(templates).toHaveLength(12);
+      expect(templates).toHaveLength(13);
     });
 
     it('should have unique directory names', () => {
@@ -24,6 +24,7 @@ describe('skill-generation', () => {
       const templates = getSkillTemplates();
       const dirNames = templates.map(t => t.dirName);
 
+      expect(dirNames).toContain('openspec-quick');
       expect(dirNames).toContain('openspec-explore');
       expect(dirNames).toContain('openspec-new-change');
       expect(dirNames).toContain('openspec-continue-change');
@@ -88,9 +89,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandTemplates', () => {
-    it('should return all 12 command templates', () => {
+    it('should return all 13 command templates', () => {
       const templates = getCommandTemplates();
-      expect(templates).toHaveLength(12);
+      expect(templates).toHaveLength(13);
     });
 
     it('should have unique IDs', () => {
@@ -104,6 +105,7 @@ describe('skill-generation', () => {
       const templates = getCommandTemplates();
       const ids = templates.map(t => t.id);
 
+      expect(ids).toContain('quick');
       expect(ids).toContain('explore');
       expect(ids).toContain('new');
       expect(ids).toContain('continue');
@@ -142,9 +144,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandContents', () => {
-    it('should return all 12 command contents', () => {
+    it('should return all 13 command contents', () => {
       const contents = getCommandContents();
-      expect(contents).toHaveLength(12);
+      expect(contents).toHaveLength(13);
     });
 
     it('should have valid content structure', () => {
@@ -162,7 +164,7 @@ describe('skill-generation', () => {
       const templates = getCommandTemplates();
       const contents = getCommandContents();
 
-      const templateIds = templates.map(t => t.id).sort();
+      const templateIds = templates.map(t => t.id === 'quick' ? 'do' : t.id).sort();
       const contentIds = contents.map(c => c.id).sort();
 
       expect(contentIds).toEqual(templateIds);
@@ -175,6 +177,13 @@ describe('skill-generation', () => {
       expect(ids).toContain('propose');
       expect(ids).toContain('explore');
       expect(ids).not.toContain('new');
+    });
+
+    it('should expose quick workflow commands as do', () => {
+      const filtered = getCommandContents(['quick']);
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe('do');
+      expect(filtered[0].body).toContain('/opsx:do');
     });
 
     it('should return all contents when filter is undefined', () => {

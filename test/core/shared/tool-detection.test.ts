@@ -28,7 +28,8 @@ describe('tool-detection', () => {
 
   describe('SKILL_NAMES', () => {
     it('should contain all skill names matching COMMAND_IDS', () => {
-      expect(SKILL_NAMES).toHaveLength(12);
+      expect(SKILL_NAMES).toHaveLength(13);
+      expect(SKILL_NAMES).toContain('openspec-quick');
       expect(SKILL_NAMES).toContain('openspec-explore');
       expect(SKILL_NAMES).toContain('openspec-new-change');
       expect(SKILL_NAMES).toContain('openspec-continue-change');
@@ -256,6 +257,29 @@ Content here
       expect(status.configured).toBe(true);
       expect(status.generatedByVersion).toBe('0.23.0');
       expect(status.needsUpdate).toBe(false);
+    });
+
+    it('should detect needsUpdate when any managed skill is stale', async () => {
+      const quickSkillDir = path.join(testDir, '.claude', 'skills', 'openspec-quick');
+      await fs.mkdir(quickSkillDir, { recursive: true });
+      await fs.writeFile(path.join(quickSkillDir, 'SKILL.md'), `---
+metadata:
+  generatedBy: "0.23.0"
+---
+`);
+
+      const exploreSkillDir = path.join(testDir, '.claude', 'skills', 'openspec-explore');
+      await fs.mkdir(exploreSkillDir, { recursive: true });
+      await fs.writeFile(path.join(exploreSkillDir, 'SKILL.md'), `---
+metadata:
+  generatedBy: "0.22.0"
+---
+`);
+
+      const status = getToolVersionStatus(testDir, 'claude', '0.23.0');
+      expect(status.configured).toBe(true);
+      expect(status.generatedByVersion).toBe('0.22.0');
+      expect(status.needsUpdate).toBe(true);
     });
 
     it('should include tool name in status', async () => {

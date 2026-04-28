@@ -5,6 +5,7 @@
  */
 
 import {
+  getQuickSkillTemplate,
   getExploreSkillTemplate,
   getNewChangeSkillTemplate,
   getContinueChangeSkillTemplate,
@@ -17,6 +18,7 @@ import {
   getOnboardSkillTemplate,
   getOpsxProposeSkillTemplate,
   getTddSkillTemplate,
+  getOpsxDoCommandTemplate,
   getOpsxExploreCommandTemplate,
   getOpsxNewCommandTemplate,
   getOpsxContinueCommandTemplate,
@@ -32,6 +34,7 @@ import {
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
+import { getCommandIdForWorkflow } from '../command-generation/index.js';
 
 /**
  * Skill template with directory name and workflow ID mapping.
@@ -57,6 +60,7 @@ export interface CommandTemplateEntry {
  */
 export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemplateEntry[] {
   const all: SkillTemplateEntry[] = [
+    { template: getQuickSkillTemplate(), dirName: 'openspec-quick', workflowId: 'quick' },
     { template: getExploreSkillTemplate(), dirName: 'openspec-explore', workflowId: 'explore' },
     { template: getNewChangeSkillTemplate(), dirName: 'openspec-new-change', workflowId: 'new' },
     { template: getContinueChangeSkillTemplate(), dirName: 'openspec-continue-change', workflowId: 'continue' },
@@ -84,6 +88,7 @@ export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemp
  */
 export function getCommandTemplates(workflowFilter?: readonly string[]): CommandTemplateEntry[] {
   const all: CommandTemplateEntry[] = [
+    { template: getOpsxDoCommandTemplate(), id: 'quick' },
     { template: getOpsxExploreCommandTemplate(), id: 'explore' },
     { template: getOpsxNewCommandTemplate(), id: 'new' },
     { template: getOpsxContinueCommandTemplate(), id: 'continue' },
@@ -112,7 +117,7 @@ export function getCommandTemplates(workflowFilter?: readonly string[]): Command
 export function getCommandContents(workflowFilter?: readonly string[]): CommandContent[] {
   const commandTemplates = getCommandTemplates(workflowFilter);
   return commandTemplates.map(({ template, id }) => ({
-    id,
+    id: getCommandIdForWorkflow(id),
     name: template.name,
     description: template.description,
     category: template.category,

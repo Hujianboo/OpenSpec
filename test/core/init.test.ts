@@ -82,12 +82,14 @@ describe('InitCommand', () => {
 
       await initCommand.execute(testDir);
 
-      // Core profile: propose, explore, apply, archive
+      // Core profile: quick, propose, explore, apply, archive, tdd
       const coreSkillNames = [
+        'openspec-quick',
         'openspec-propose',
         'openspec-explore',
         'openspec-apply-change',
         'openspec-archive-change',
+        'openspec-tdd',
       ];
 
       for (const skillName of coreSkillNames) {
@@ -121,12 +123,14 @@ describe('InitCommand', () => {
 
       await initCommand.execute(testDir);
 
-      // Core profile: propose, explore, apply, archive
+      // Core profile: quick, propose, explore, apply, archive, tdd
       const coreCommandNames = [
+        'opsx/do.md',
         'opsx/propose.md',
         'opsx/explore.md',
         'opsx/apply.md',
         'opsx/archive.md',
+        'opsx/tdd.md',
       ];
 
       for (const cmdName of coreCommandNames) {
@@ -148,6 +152,16 @@ describe('InitCommand', () => {
         const cmdFile = path.join(testDir, '.claude', 'commands', cmdName);
         expect(await fileExists(cmdFile)).toBe(false);
       }
+    });
+
+    it('should show the quick terminal helper in the init success output', async () => {
+      const initCommand = new InitCommand({ tools: 'claude', force: true });
+
+      await initCommand.execute(testDir);
+
+      const logCalls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat().map(String);
+      expect(logCalls.some((entry) => entry.includes('/opsx:do "your request"'))).toBe(true);
+      expect(logCalls.some((entry) => entry.includes('blockspec quick "your request"'))).toBe(true);
     });
 
     it('should create skills in Cursor skills directory', async () => {

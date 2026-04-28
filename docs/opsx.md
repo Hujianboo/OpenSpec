@@ -65,7 +65,7 @@ openspec init
 
 This creates skills in `.claude/skills/` (or equivalent) that AI coding assistants auto-detect.
 
-By default, OpenSpec uses the `core` workflow profile (`propose`, `explore`, `apply`, `archive`). If you want the expanded workflow commands (`new`, `continue`, `ff`, `verify`, `sync`, `bulk-archive`, `onboard`), configure them with `openspec config profile` and apply with `openspec update`.
+By default, OpenSpec uses the `core` workflow profile (`quick`, `propose`, `explore`, `apply`, `archive`). This gives you both Fast Lane (`/opsx:do`) and the planned proposal/apply path. If you want the expanded workflow commands (`new`, `continue`, `ff`, `verify`, `sync`, `bulk-archive`, `onboard`), configure them with `openspec config profile` and apply with `openspec update`.
 
 During setup, you'll be prompted to create a **project config** (`openspec/config.yaml`). This is optional but recommended.
 
@@ -157,7 +157,8 @@ rules:
 
 | Command | What it does |
 |---------|--------------|
-| `/opsx:propose` | Create a change and generate planning artifacts in one step (default quick path) |
+| `/opsx:do` | Fast Lane: implement a small, low-risk request with a minimal quick record |
+| `/opsx:propose` | Create a change and generate planning artifacts in one step (planned path) |
 | `/opsx:explore` | Think through ideas, investigate problems, clarify requirements |
 | `/opsx:new` | Start a new change scaffold (expanded workflow) |
 | `/opsx:continue` | Create the next artifact (expanded workflow) |
@@ -170,6 +171,14 @@ rules:
 | `/opsx:onboard` | Guided walkthrough of an end-to-end change (expanded workflow) |
 
 ## Usage
+
+### Fast Lane a small change
+```
+/opsx:do "update pricing CTA copy"
+```
+Creates or reuses a minimal quick record (`quick.md` + `tasks.md`), implements immediately, updates the record, and summarizes the work. Default quick mode does not run tests. Add `--verify` when you want one lightweight relevant check, or `--no-record` when you truly want no change directory.
+
+Quick mode is additive; it does not replace `propose → apply`. The agent should stop and recommend `/opsx:propose` for auth, payments, database migrations, data deletion, permissions, public APIs, broad multi-file work, unclear requirements, or anything that needs formal review.
 
 ### Explore an idea
 ```
@@ -212,6 +221,8 @@ Works through tasks, checking them off as you go. If you're juggling multiple ch
 ```
 /opsx:archive   # Move to archive when done (prompts to sync specs if needed)
 ```
+
+Quick records can be archived with the same command. If a quick record has `quick.md` but no `specs/` delta files, archive treats it as history-only and does not update main specs. If quick mode escalated and produced spec deltas, archive uses the normal spec update flow.
 
 ## When to Update vs. Start Fresh
 

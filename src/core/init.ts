@@ -23,6 +23,7 @@ import { serializeConfig } from './config-prompts.js';
 import {
   generateCommands,
   CommandAdapterRegistry,
+  getCommandIdForWorkflow,
 } from './command-generation/index.js';
 import {
   detectLegacyArtifacts,
@@ -61,6 +62,7 @@ const PROGRESS_SPINNER = {
 };
 
 const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
+  'quick': 'openspec-quick',
   'explore': 'openspec-explore',
   'new': 'openspec-new-change',
   'continue': 'openspec-continue-change',
@@ -704,6 +706,10 @@ export class InitCommand {
     console.log();
     if (activeWorkflows.includes('propose')) {
       console.log(chalk.bold('Getting started:'));
+      if (activeWorkflows.includes('quick')) {
+        console.log('  Fast lane for small changes: /opsx:do "your request"');
+        console.log('  Terminal helper: blockspec quick "your request"');
+      }
       console.log('  Start your first change: /opsx:propose "your idea"');
     } else if (activeWorkflows.includes('new')) {
       console.log(chalk.bold('Getting started:'));
@@ -762,7 +768,7 @@ export class InitCommand {
     if (!adapter) return 0;
 
     for (const workflow of ALL_WORKFLOWS) {
-      const cmdPath = adapter.getFilePath(workflow);
+      const cmdPath = adapter.getFilePath(getCommandIdForWorkflow(workflow));
       const fullPath = path.isAbsolute(cmdPath) ? cmdPath : path.join(projectPath, cmdPath);
 
       try {

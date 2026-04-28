@@ -1,6 +1,6 @@
 ---
-name: openspec-propose
-description: Propose a new change with all artifacts generated in one step. Use when the user wants to quickly describe what they want to build and get a complete proposal with design, specs, and tasks ready for implementation.
+name: openspec-tdd
+description: Propose a new change using the TDD workflow with test-plan and RED/GREEN/REFACTOR task labels. Use when the user wants test-driven development discipline in their OpenSpec workflow.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -9,12 +9,14 @@ metadata:
   generatedBy: "1.3.3"
 ---
 
-Propose a new change - create the change and generate all artifacts in one step.
+Propose a new change using the **TDD workflow**.
 
 I'll create a change with artifacts:
 - proposal.md (what & why)
-- design.md (how)
-- tasks.md (implementation steps)
+- specs (GIVEN/WHEN/THEN scenarios)
+- test-plan.md (verification strategy)
+- design.md (how, with test strategy)
+- tasks.md ([RED]/[GREEN]/[REFACTOR]/[UI]/[VERIFY] labeled tasks)
 
 When ready to implement, run /opsx:apply
 
@@ -33,11 +35,11 @@ When ready to implement, run /opsx:apply
 
    **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
 
-2. **Create the change directory**
+2. **Create the change directory with TDD schema**
    ```bash
-   openspec new change "<name>"
+   openspec new change "<name>" --schema tdd
    ```
-   This creates a scaffolded change at `openspec/changes/<name>/` with `.openspec.yaml`.
+   This creates a scaffolded change at `openspec/changes/<name>/` with `.openspec.yaml` bound to the `tdd` schema.
 
 3. **Get the artifact build order**
    ```bash
@@ -46,6 +48,8 @@ When ready to implement, run /opsx:apply
    Parse the JSON to get:
    - `applyRequires`: array of artifact IDs needed before implementation (e.g., `["tasks"]`)
    - `artifacts`: list of all artifacts with their status and dependencies
+
+   The TDD schema defines 5 artifacts: `proposal → specs → test-plan → design → tasks`
 
 4. **Create artifacts in sequence until apply-ready**
 

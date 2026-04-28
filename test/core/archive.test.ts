@@ -314,6 +314,75 @@ New feature description.
       expect(archives.length).toBe(1);
     });
 
+    it('should archive quick records without specs as history-only changes', async () => {
+      const changeName = 'quick-20260428-copy';
+      const changeDir = path.join(tempDir, 'openspec', 'changes', changeName);
+      await fs.mkdir(changeDir, { recursive: true });
+      await fs.writeFile(path.join(changeDir, 'quick.md'), '## Request\n\nUpdate copy');
+      await fs.writeFile(path.join(changeDir, 'tasks.md'), '- [x] Task 1\n');
+
+      await archiveCommand.execute(changeName, { yes: true });
+
+      expect(console.log).toHaveBeenCalledWith(
+        'Quick record has no spec deltas. Archiving without updating main specs.'
+      );
+      expect(console.log).not.toHaveBeenCalledWith(
+        expect.stringContaining('Specs to update')
+      );
+
+      const archiveDir = path.join(tempDir, 'openspec', 'changes', 'archive');
+      const archives = await fs.readdir(archiveDir);
+      expect(archives).toHaveLength(1);
+      expect(archives[0]).toMatch(new RegExp(`\\d{4}-\\d{2}-\\d{2}-${changeName}`));
+    });
+
+    it('should use normal spec updates for quick records with delta specs', async () => {
+      const changeName = 'quick-20260428-with-specs';
+      const changeDir = path.join(tempDir, 'openspec', 'changes', changeName);
+      const changeSpecDir = path.join(changeDir, 'specs', 'quick-capability');
+      await fs.mkdir(changeSpecDir, { recursive: true });
+      await fs.writeFile(path.join(changeDir, 'quick.md'), '## Request\n\nAdd capability');
+      await fs.writeFile(path.join(changeDir, 'tasks.md'), '- [x] Task 1\n');
+      await fs.writeFile(path.join(changeSpecDir, 'spec.md'), `# Quick Capability Changes
+
+## ADDED Requirements
+
+### Requirement: Quick capability
+The system SHALL archive quick records with specs through the normal process.
+
+#### Scenario: Delta is applied
+- **WHEN** a quick record contains spec deltas
+- **THEN** the archive command applies them normally`);
+
+      await archiveCommand.execute(changeName, { yes: true, noValidate: true });
+
+      expect(console.log).not.toHaveBeenCalledWith(
+        'Quick record has no spec deltas. Archiving without updating main specs.'
+      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Specs to update'));
+
+      const mainSpecPath = path.join(tempDir, 'openspec', 'specs', 'quick-capability', 'spec.md');
+      const updatedContent = await fs.readFile(mainSpecPath, 'utf-8');
+      expect(updatedContent).toContain('### Requirement: Quick capability');
+    });
+
+    it('should preserve incomplete-task warning for quick records', async () => {
+      const changeName = 'quick-20260428-incomplete';
+      const changeDir = path.join(tempDir, 'openspec', 'changes', changeName);
+      await fs.mkdir(changeDir, { recursive: true });
+      await fs.writeFile(path.join(changeDir, 'quick.md'), '## Request\n\nUpdate copy');
+      await fs.writeFile(path.join(changeDir, 'tasks.md'), '- [x] Task 1\n- [ ] Task 2\n');
+
+      await archiveCommand.execute(changeName, { yes: true });
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('Warning: 1 incomplete task(s) found')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        'Quick record has no spec deltas. Archiving without updating main specs.'
+      );
+    });
+
     it('should skip spec updates when --skip-specs flag is used', async () => {
       const changeName = 'skip-specs-feature';
       const changeDir = path.join(tempDir, 'openspec', 'changes', changeName);

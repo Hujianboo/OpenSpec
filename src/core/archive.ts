@@ -47,6 +47,36 @@ async function moveDirectory(src: string, dest: string): Promise<void> {
   }
 }
 
+async function hasFile(filePath: string): Promise<boolean> {
+  try {
+    const stat = await fs.stat(filePath);
+    return stat.isFile();
+  } catch {
+    return false;
+  }
+}
+
+async function hasDeltaSpecFiles(changeDir: string): Promise<boolean> {
+  const changeSpecsDir = path.join(changeDir, 'specs');
+
+  try {
+    const candidates = await fs.readdir(changeSpecsDir, { withFileTypes: true });
+    for (const candidate of candidates) {
+      if (!candidate.isDirectory()) continue;
+
+      const candidatePath = path.join(changeSpecsDir, candidate.name, 'spec.md');
+      try {
+        const content = await fs.readFile(candidatePath, 'utf-8');
+        if (/^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements/m.test(content)) {
+          return true;
+        }
+      } catch {}
+    }
+  } catch {}
+
+  return false;
+}
+
 export class ArchiveCommand {
   async execute(
     changeName?: string,
@@ -87,6 +117,9 @@ export class ArchiveCommand {
     }
 
     const skipValidation = options.validate === false || options.noValidate === true;
+    const isQuickRecord = await hasFile(path.join(changeDir, 'quick.md'));
+    const hasDeltaSpecs = await hasDeltaSpecFiles(changeDir);
+    const isHistoryOnlyQuickRecord = isQuickRecord && !hasDeltaSpecs;
 
     // Validate specs and change before archiving
     if (!skipValidation) {
@@ -111,24 +144,6 @@ export class ArchiveCommand {
       }
 
       // Validate delta-formatted spec files under the change directory if present
-      const changeSpecsDir = path.join(changeDir, 'specs');
-      let hasDeltaSpecs = false;
-      try {
-        const candidates = await fs.readdir(changeSpecsDir, { withFileTypes: true });
-        for (const c of candidates) {
-          if (c.isDirectory()) {
-            try {
-              const candidatePath = path.join(changeSpecsDir, c.name, 'spec.md');
-              await fs.access(candidatePath);
-              const content = await fs.readFile(candidatePath, 'utf-8');
-              if (/^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements/m.test(content)) {
-                hasDeltaSpecs = true;
-                break;
-              }
-            } catch {}
-          }
-        }
-      } catch {}
       if (hasDeltaSpecs) {
         const deltaReport = await validator.validateChangeDeltaSpecs(changeDir);
         if (!deltaReport.valid) {
@@ -196,6 +211,8 @@ export class ArchiveCommand {
     // Handle spec updates unless skipSpecs flag is set
     if (options.skipSpecs) {
       console.log('Skipping spec updates (--skip-specs flag provided).');
+    } else if (isHistoryOnlyQuickRecord) {
+      console.log('Quick record has no spec deltas. Archiving without updating main specs.');
     } else {
       // Find specs to update
       const specUpdates = await findSpecUpdates(changeDir, mainSpecsDir);

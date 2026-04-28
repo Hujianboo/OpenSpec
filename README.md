@@ -1,3 +1,15 @@
+<p align="center">
+  <img src="assets/blockspec_bg.png" alt="BlockSpec" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@blockdance-lab/blockspec"><img alt="npm version" src="https://img.shields.io/npm/v/%40blockdance-lab%2Fblockspec?style=flat-square"></a>
+  <a href="https://www.npmjs.com/package/@blockdance-lab/blockspec"><img alt="npm downloads" src="https://img.shields.io/npm/dm/%40blockdance-lab%2Fblockspec?style=flat-square"></a>
+  <a href="https://github.com/Hujianboo/OpenSpec/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Hujianboo/OpenSpec/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://nodejs.org/"><img alt="Node.js" src="https://img.shields.io/node/v/%40blockdance-lab%2Fblockspec?style=flat-square"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square"></a>
+</p>
+
 **Language / 语言:** [English](README.md) · [中文](README.zh-CN.md)
 
 ---
@@ -11,7 +23,15 @@ npm install -g @blockdance-lab/blockspec   # global CLI (command: blockspec)
 npm install @blockdance-lab/blockspec      # add as a project dependency
 ```
 
-Run `blockspec init` in your repo, then use the same `/opsx:…` slash commands as upstream OpenSpec. The rest of this README still documents the OpenSpec-style workflow and CLI unless noted here.
+Run `blockspec init` in your repo, then use the same `/opsx:…` slash commands as upstream OpenSpec. The init summary now highlights both Fast Lane entries:
+
+```text
+Fast lane for small changes: /opsx:do "your request"
+Terminal helper: blockspec quick "your request"
+Start your first change: /opsx:propose "your idea"
+```
+
+The rest of this README still documents the OpenSpec-style workflow and CLI unless noted here.
 
 ### TDD workflow (`tdd` schema)
 
@@ -30,6 +50,20 @@ BlockSpec does not force everything through unit tests. The pipeline is controll
 ### Default workflow (lighter)
 
 **`/opsx:propose "<name>"`** — **proposal → specs → design → tasks** (no required `test-plan`). Same slash command works under OpenSpec or after `blockspec init`.
+
+### Fast Lane quick mode
+
+Use **`/opsx:do "<small request>"`** when the change is low-risk and you want the assistant to create a minimal record and implement immediately. It creates `quick.md` and `tasks.md` by default, does not require proposal review, and does not run tests unless you add `--verify` or the assistant decides a check is necessary.
+
+Terminal helper:
+
+```bash
+blockspec quick "update pricing CTA copy"          # create quick.md/tasks.md, then hand off to /opsx:do
+blockspec quick "update pricing CTA copy" --verify # ask the agent to run one lightweight relevant check
+blockspec quick "fix typo" --no-record             # no change directory, direct handoff
+```
+
+Quick mode sits beside the proposal/apply flow; it does not replace it. It should escalate to `/opsx:propose` for auth, payments, database migrations, permissions, public APIs, broad refactors, unclear requirements, or anything that needs formal review. Recorded quick changes can still be archived; if they have no `specs/` delta files, archive keeps them as history without updating main specs.
 
 → More on slash workflows: [docs/opsx.md](docs/opsx.md)
 
@@ -63,6 +97,20 @@ Using OpenSpec in a team? [Email here](mailto:teams@openspec.dev) for access to 
 <!-- TODO: Add GIF demo of /opsx:propose → /opsx:archive workflow -->
 
 ## See it in action
+
+**Fast Lane** (`quick`): minimal record → implement → summary
+
+```text
+You: /opsx:do "rename pricing CTA to Start free trial"
+AI:  Created openspec/changes/quick-20260428-pricing-cta/
+     ✓ quick.md — request, mode, summary placeholders
+     ✓ tasks.md — 3-5 lightweight implementation tasks
+     ✓ Updated pricing CTA copy
+     No tests run by default quick mode.
+
+You: /opsx:archive quick-20260428-pricing-cta
+AI:  Archived as a history-only quick record. No main specs updated.
+```
 
 **TDD workflow** (`tdd`): proposal → specs → test-plan → design → tasks
 
@@ -124,20 +172,20 @@ AI:  Archived to openspec/changes/archive/2025-01-23-add-dark-mode/
 
 **Requires Node.js 20.19.0 or higher.**
 
-Install OpenSpec globally:
+Install BlockSpec globally:
 
 ```bash
-npm install -g @fission-ai/openspec@latest
+npm install -g @blockdance-lab/blockspec@latest
 ```
 
 Then navigate to your project directory and initialize:
 
 ```bash
 cd your-project
-openspec init
+blockspec init
 ```
 
-Tell your AI: **`/opsx:tdd <what-you-want-to-build>`** for test-driven development (adds `test-plan` and `[RED]/[GREEN]/[REFACTOR]` discipline), or **`/opsx:propose <what-you-want-to-build>`** for the default lighter workflow.
+After init, use **`/opsx:do <small-request>`** for Fast Lane implementation, or prepare the same path from the terminal with **`blockspec quick "<small-request>"`**. Use **`/opsx:tdd <what-you-want-to-build>`** for test-driven development, or **`/opsx:propose <what-you-want-to-build>`** for the default planned workflow.
 
 If you want the expanded workflow (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`), select it with `openspec config profile` and apply with `openspec update`.
 

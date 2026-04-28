@@ -7,6 +7,13 @@
 import type { CommandContent, ToolCommandAdapter, GeneratedCommand } from './types.js';
 
 /**
+ * Maps workflow IDs to the command IDs that tools expose.
+ */
+export function getCommandIdForWorkflow(workflowId: string): string {
+  return workflowId === 'quick' ? 'do' : workflowId;
+}
+
+/**
  * Generate a single command file using the provided adapter.
  * @param content - The tool-agnostic command content
  * @param adapter - The tool-specific adapter

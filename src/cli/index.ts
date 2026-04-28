@@ -7,6 +7,7 @@ import { AI_TOOLS } from '../core/config.js';
 import { UpdateCommand } from '../core/update.js';
 import { ListCommand } from '../core/list.js';
 import { ArchiveCommand } from '../core/archive.js';
+import { QuickCommand } from '../core/quick.js';
 import { ViewCommand } from '../core/view.js';
 import { registerSpecCommand } from '../commands/spec.js';
 import { ChangeCommand } from '../commands/change.js';
@@ -164,6 +165,25 @@ program
       await updateCommand.execute(resolvedPath);
     } catch (error) {
       console.log(); // Empty line for spacing
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('quick <request>')
+  .description('Fast Lane: prepare a lightweight quick change record for agent implementation')
+  .option('--no-record', 'Skip quick change record creation and print direct agent handoff instructions')
+  .option('--verify', 'Ask the agent to run a lightweight relevant check after implementation')
+  .action(async (request: string, options?: { record?: boolean; verify?: boolean }) => {
+    try {
+      const quickCommand = new QuickCommand();
+      await quickCommand.execute(request, {
+        noRecord: options?.record === false,
+        verify: options?.verify,
+      });
+    } catch (error) {
+      console.log();
       ora().fail(`Error: ${(error as Error).message}`);
       process.exit(1);
     }

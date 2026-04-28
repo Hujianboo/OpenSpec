@@ -33,7 +33,7 @@ function setupCoreSkills(projectDir: string): void {
 
 function setupCoreCommands(projectDir: string): void {
   for (const workflow of CORE_WORKFLOWS) {
-    writeCommand(projectDir, workflow);
+    writeCommand(projectDir, workflow === 'quick' ? 'do' : workflow);
   }
 }
 

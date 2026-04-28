@@ -12,6 +12,7 @@ import { AI_TOOLS } from '../config.js';
  * Names of skill directories created by openspec init.
  */
 export const SKILL_NAMES = [
+  'openspec-quick',
   'openspec-explore',
   'openspec-new-change',
   'openspec-continue-change',
@@ -32,6 +33,7 @@ export type SkillName = (typeof SKILL_NAMES)[number];
  * IDs of command templates created by openspec init.
  */
 export const COMMAND_IDS = [
+  'do',
   'explore',
   'new',
   'continue',
@@ -157,7 +159,7 @@ export function extractGeneratedByVersion(skillFilePath: string): string | null 
 }
 
 /**
- * Gets version status for a tool by reading the first available skill file.
+ * Gets version status for a tool by checking every managed skill file.
  */
 export function getToolVersionStatus(
   projectRoot: string,
@@ -177,18 +179,27 @@ export function getToolVersionStatus(
 
   const skillsDir = path.join(projectRoot, tool.skillsDir, 'skills');
   let generatedByVersion: string | null = null;
+  let configured = false;
+  let needsUpdate = false;
 
-  // Find the first skill file that exists and read its version
+  // Scan every managed skill. A single stale skill means the tool needs refresh.
   for (const skillName of SKILL_NAMES) {
     const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
     if (fs.existsSync(skillFile)) {
-      generatedByVersion = extractGeneratedByVersion(skillFile);
-      break;
+      configured = true;
+      const skillVersion = extractGeneratedByVersion(skillFile);
+
+      if (generatedByVersion === null) {
+        generatedByVersion = skillVersion;
+      }
+
+      if (skillVersion === null || skillVersion !== currentVersion) {
+        generatedByVersion = skillVersion;
+        needsUpdate = true;
+        break;
+      }
     }
   }
-
-  const configured = getToolSkillStatus(projectRoot, toolId).configured;
-  const needsUpdate = configured && (generatedByVersion === null || generatedByVersion !== currentVersion);
 
   return {
     toolId,

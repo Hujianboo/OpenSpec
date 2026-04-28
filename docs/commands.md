@@ -10,6 +10,7 @@ For workflow patterns and when to use each command, see [Workflows](workflows.md
 
 | Command | Purpose |
 |---------|---------|
+| `/opsx:do` | Fast Lane for small, low-risk changes |
 | `/opsx:propose` | Create a change and generate planning artifacts in one step |
 | `/opsx:explore` | Think through ideas before committing to a change |
 | `/opsx:apply` | Implement tasks from the change |
@@ -32,6 +33,62 @@ The default global profile is `core`. To enable expanded workflow commands, run 
 ---
 
 ## Command Reference
+
+### `/opsx:do`
+
+Fast Lane for small, low-risk changes. Creates a minimal quick record by default, implements immediately, and summarizes the result.
+
+**Syntax:**
+```text
+/opsx:do <request> [--no-record] [--verify]
+```
+
+**Arguments:**
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `request` | Yes | Plain-language request to build or fix |
+| `--no-record` | No | Skip `openspec/changes/<name>/` creation and implement directly |
+| `--verify` | No | Ask the assistant to run one lightweight relevant check after implementation |
+
+**What it does:**
+- Checks whether the request is safe for quick mode before editing
+- Creates or reuses `openspec/changes/quick-YYYYMMDD-<topic>/`
+- Writes `quick.md` and a 3-5 item `tasks.md`
+- Implements the requested change immediately
+- Marks quick tasks complete and updates `quick.md` with implementation and verification notes
+
+**Escalates to `/opsx:propose` when:**
+- The request touches auth, payments, database migrations, data deletion, permissions, public APIs, or security-sensitive behavior
+- The change is broad, unclear, or likely to affect many files
+- The work needs design review, formal specs, or stronger test coverage before implementation
+
+**Archive behavior:**
+Recorded quick changes use normal `/opsx:archive`. If the quick record has no `specs/` delta files, archive moves it to history without updating main specs. If quick mode produced spec deltas, archive uses the normal spec update flow.
+
+**Terminal helper:**
+```bash
+blockspec quick "update pricing CTA copy"
+blockspec quick "update pricing CTA copy" --verify
+blockspec quick "fix typo" --no-record
+```
+
+**Example:**
+```text
+You: /opsx:do "update pricing CTA copy"
+
+AI:  Created openspec/changes/quick-20260428-pricing-cta/
+     ✓ quick.md
+     ✓ tasks.md
+     ✓ Updated pricing CTA copy
+     No tests run by default quick mode.
+```
+
+**Tips:**
+- Use this for small edits where proposal review would interrupt flow
+- Use `/opsx:propose` for product behavior, API contracts, risky changes, or anything you want reviewed before code changes
+- Add `--verify` when a quick relevant check is obvious and worth running
+
+---
 
 ### `/opsx:propose`
 
@@ -65,7 +122,7 @@ AI:  Created openspec/changes/add-dark-mode/
 ```
 
 **Tips:**
-- Use this for the fastest end-to-end path
+- Use this for the fastest planned path
 - If you want step-by-step artifact control, enable expanded workflows and use `/opsx:new` + `/opsx:continue`
 
 ---
@@ -614,10 +671,10 @@ Different AI tools use slightly different command syntax. Use the format that ma
 
 | Tool | Syntax Example |
 |------|----------------|
-| Claude Code | `/opsx:propose`, `/opsx:apply` |
-| Cursor | `/opsx-propose`, `/opsx-apply` |
-| Windsurf | `/opsx-propose`, `/opsx-apply` |
-| Copilot (IDE) | `/opsx-propose`, `/opsx-apply` |
+| Claude Code | `/opsx:do`, `/opsx:propose`, `/opsx:apply` |
+| Cursor | `/opsx-do`, `/opsx-propose`, `/opsx-apply` |
+| Windsurf | `/opsx-do`, `/opsx-propose`, `/opsx-apply` |
+| Copilot (IDE) | `/opsx-do`, `/opsx-propose`, `/opsx-apply` |
 | Trae | Skill-based invocations such as `/openspec-propose`, `/openspec-apply-change` (no generated `opsx-*` command files) |
 
 The intent is the same across tools, but how commands are surfaced can differ by integration.

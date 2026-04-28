@@ -2,11 +2,14 @@
 
 The OpenSpec CLI (`openspec`) provides terminal commands for project setup, validation, status inspection, and management. These commands complement the AI slash commands (like `/opsx:propose`) documented in [Commands](commands.md).
 
+BlockSpec installs the CLI as `blockspec`. In this fork, use `blockspec` for the same commands shown as `openspec` in upstream-oriented examples.
+
 ## Summary
 
 | Category | Commands | Purpose |
 |----------|----------|---------|
 | **Setup** | `init`, `update` | Initialize and update OpenSpec in your project |
+| **Fast Lane** | `quick` | Prepare a lightweight quick change record and agent handoff |
 | **Browsing** | `list`, `view`, `show` | Explore changes and specs |
 | **Validation** | `validate` | Check changes and specs for issues |
 | **Lifecycle** | `archive` | Finalize completed changes |
@@ -67,7 +70,7 @@ These options work with all commands:
 
 Initialize OpenSpec in your project. Creates the folder structure and configures AI tool integrations.
 
-Default behavior uses global config defaults: profile `core`, delivery `both`, workflows `propose, explore, apply, archive`.
+Default behavior uses global config defaults: profile `core`, delivery `both`, workflows `quick, propose, explore, apply, archive`.
 
 ```
 openspec init [path] [options]
@@ -156,6 +159,60 @@ openspec update [path] [options]
 npm update @fission-ai/openspec
 openspec update
 ```
+
+---
+
+## Fast Lane Commands
+
+### `blockspec quick`
+
+Prepare a lightweight quick change record for agent implementation. This command does not edit project code itself; it creates the minimal record and prints the `/opsx:do` handoff for your AI assistant.
+
+```
+blockspec quick <request> [options]
+```
+
+You can run the same CLI implementation as `openspec quick` in upstream installs.
+
+**Arguments:**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `request` | Yes | Plain-language request for the small change |
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--no-record` | Do not create `openspec/changes/<name>/`; print direct `/opsx:do ... --no-record` handoff |
+| `--verify` | Include verification intent in the quick record and handoff; the CLI does not run tests |
+
+**Examples:**
+
+```bash
+# Create quick.md/tasks.md and print agent handoff
+blockspec quick "update pricing CTA copy"
+
+# Ask the agent to run one lightweight relevant check after implementation
+blockspec quick "adjust mobile spacing" --verify
+
+# Skip change record creation entirely
+blockspec quick "fix typo in README" --no-record
+```
+
+**What it creates by default:**
+
+```
+openspec/changes/quick-YYYYMMDD-<topic>/
+├── quick.md   # Request, mode, escalation decision, summary, verification notes
+└── tasks.md   # 3-5 lightweight implementation tasks
+```
+
+**Escalation model:**
+Quick mode is for low-risk work. The assistant should stop and recommend the formal `/opsx:propose` → `/opsx:apply` path for auth, payments, database migrations, data deletion, permissions, public APIs, broad multi-file changes, unclear requirements, or anything that needs formal review.
+
+**Archive behavior:**
+Recorded quick changes are archived with the normal archive command. If a quick record has no `specs/` delta files, archive treats it as history-only and does not update main specs. If spec deltas exist, the normal spec merge flow applies.
 
 ---
 
@@ -396,6 +453,8 @@ openspec archive update-ci-config --skip-specs
 2. Prompts for confirmation (unless `--yes`)
 3. Merges delta specs into `openspec/specs/`
 4. Moves change folder to `openspec/changes/archive/YYYY-MM-DD-<name>/`
+
+For quick records created by `blockspec quick` or `/opsx:do`, archive skips step 3 when the change has `quick.md` but no `specs/` delta files. The archived record remains searchable history, but later spec-driven requirements are not affected by it unless spec deltas were created.
 
 ---
 

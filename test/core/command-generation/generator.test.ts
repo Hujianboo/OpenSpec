@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateCommand, generateCommands } from '../../../src/core/command-generation/generator.js';
+import { generateCommand, generateCommands, getCommandIdForWorkflow } from '../../../src/core/command-generation/generator.js';
 import { claudeAdapter } from '../../../src/core/command-generation/adapters/claude.js';
 import { cursorAdapter } from '../../../src/core/command-generation/adapters/cursor.js';
 import type { CommandContent, ToolCommandAdapter } from '../../../src/core/command-generation/types.js';
@@ -13,6 +13,13 @@ describe('command-generation/generator', () => {
     tags: ['workflow'],
     body: 'Command body here.',
   };
+
+  describe('getCommandIdForWorkflow', () => {
+    it('maps quick workflow to do command id', () => {
+      expect(getCommandIdForWorkflow('quick')).toBe('do');
+      expect(getCommandIdForWorkflow('apply')).toBe('apply');
+    });
+  });
 
   describe('generateCommand', () => {
     it('should generate command with path and content using Claude adapter', () => {

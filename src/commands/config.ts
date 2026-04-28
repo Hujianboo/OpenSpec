@@ -42,6 +42,10 @@ interface WorkflowPromptMeta {
 }
 
 const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
+  quick: {
+    name: 'Quick do',
+    description: 'Fast Lane for small changes via /opsx:do',
+  },
   propose: {
     name: 'Propose change',
     description: 'Create proposal, design, and tasks from a request',
