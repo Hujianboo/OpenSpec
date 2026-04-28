@@ -13,10 +13,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://github.com/Hujianboo/OpenSpec",
+  "homepage": "https://github.com/Hujianboo/BlockSpec",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Hujianboo/OpenSpec"
+    "url": "git+https://github.com/Hujianboo/BlockSpec.git"
   },
   "license": "MIT",
   "author": "OpenSpec Contributors",
@@ -28,7 +28,7 @@
     }
   },
   "bin": {
-    "blockspec": "./bin/openspec.js"
+    "blockspec": "bin/openspec.js"
   },
   "files": [
     "README.zh-CN.md",
